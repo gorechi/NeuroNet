@@ -5,6 +5,7 @@ import scipy.special
 import matplotlib.pyplot as plt
 import pickle
 from test import *
+import random
 
 class NeuralNetwork:
     def __init__(self, inputnodes, hiddennodes, outputnodes, learningrate):
@@ -75,10 +76,10 @@ class NeuralNetwork:
 
 
 # Константы
-input_nodes = 784
-hidden_nodes = 200
-output_nodes = 10
-learning_rate = 0.1
+input_nodes = 254
+hidden_nodes = 2000
+output_nodes = 2
+learning_rate = 0.01
 
 def load_net(file):
     with open(file, 'rb') as f:
@@ -86,37 +87,19 @@ def load_net(file):
     return net
 
 # Создаем сеть
-#n = NeuralNetwork(input_nodes, hidden_nodes, output_nodes, learning_rate)
-n = load_net('n_saved.pickle')
+n = NeuralNetwork(input_nodes, hidden_nodes, output_nodes, learning_rate)
+#n = load_net('n_saved.pickle')
 
-# Загружаем тренировочные данные
-data_file = open('mnist_train.csv', 'r')
-trainig_data_list = data_file.readlines()
-data_file.close()
+# Читаем тренировочные данные
+yesData = readfile('yes.txt', 1)
+noData = readfile('no.txt', 0)
+trainData = yesData + noData
+random.shuffle(trainData)
 
-# Загружаем тестовые данные
-data_file = open('mnist_test.csv', 'r')
-test_data_list = data_file.readlines()
-data_file.close()
+#Учим сеть
+for data in trainData:
+    n.train(data[1:], data[0])
 
-
-#for record in trainig_data_list:
-#    all_values = record.split(',')
-#    inputs = numpy.asfarray(all_values[1:]) / 255 * 0.99 + 0.01
-#    targets = numpy.zeros(output_nodes) + 0.01
-#    targets [int(all_values[0])] = 0.99
-#    n.train(inputs, targets)
-
-
-all_values = test_data_list[4].split(',')
-image_array = numpy.asfarray(all_values[1:]).reshape((28,28))
-plt.imshow(image_array, cmap='Greys', interpolation='None')
-plt.show()
-data_set = numpy.asfarray(all_values[1:])/255*0.99-0.01
-scorecard = n.test(test_data_list)
-print (scorecard)
-scorecard_array = numpy.asarray(scorecard)
-print('Эффективность: ', scorecard_array.sum()/scorecard_array.size)
-n.save('n_saved.pickle')
-#n = NeuralNetwork(input_nodes, hidden_nodes, output_nodes, learning_rate)
-#print(n.query([1,0.5,-1.5]))
+#Проверяем сеть
+testData = str_to_data('Не замочив ног лужу не перепрыгнешь.', 1)
+print (n.query(testData[1:]))
